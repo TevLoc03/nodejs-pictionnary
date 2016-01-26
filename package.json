@@ -1,0 +1,17 @@
+{
+  "name": "auth",
+  "version": "0.0.1",
+  "dependencies": {
+    "ejs": "^2.3.4",
+    "express": "^4.13.3",
+    "log4js": "^0.6.29",
+    "morgan": "^1.6.1",
+    "mysql": "^2.10.2",
+    "passport": "^0.3.2",
+    "serve-favicon": "^2.3.0",
+    "sha256": "^0.2.0",
+    "sqlstring": "^1.0.0"
+  },
+  "author": "Mail <email@etu.unice.fr>",
+  "description": "Enregistrement et authentification"
+}
