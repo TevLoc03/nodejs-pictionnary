@@ -29,20 +29,16 @@ module.exports = function (app) {
     /**
      * Route pour la partie Login
      */
-    app.route('/login')
-        .get(pool.home_redirect);
+    app.get('/login', pool.home_redirect);
 
-    app.route('/login')
-        .post(pool.login_verify);
+    app.post('/login', pool.login_verify);
 
     /**
      * Route pour la partie inscription
      */
-    app.route('/subscribe')
-        .get(pool.getSubscribe);
+    app.get('/subscribe', pool.getSubscribe);
 
-    app.route('/subscribe')
-        .post(pool.postSubscribe);
+    app.post('/subscribe', pool.postSubscribe);
 
     /**
      * Route pour deco
@@ -52,22 +48,24 @@ module.exports = function (app) {
     /**
      * Route pour l'accueil
      */
-    app.route('/home')
-        .get(pool.getHome);
+    app.get('/home', pool.getHome);
 
     /**
      * Route pour paint (faire les dessins)
      */
-    app.route('/paint')
-        .get(pool.getPaint);
+    app.get('/paint', pool.getPaint);
 
-    app.route('/paint')
-        .post(pool.postPaint);
+    app.post('/paint', pool.postPaint);
 
     /**
      * Route pour suppression dessin
      */
     app.post('/deleteDessin', pool.deleteDessin);
+
+    /**
+     * Route pour Revoir dessins
+     */
+    app.post('/guess', pool.postGuess);
 
     /**
      * Route pour suppression utilisateur

@@ -220,17 +220,56 @@ exports.deleteDessin = function(req, res){
 };
 
 /**
- * Suppression utilisateurs (en cours)
+ * Revoir dessin
+ * @param req
+ * @param res
+ */
+exports.postGuess = function(req, res) {
+    if(!req.session.authid){
+        res.redirect('/login');
+    }else{
+        sql = 'SELECT commandes FROM draws WHERE id =' + req.body.id_view_dessin;
+        mysql.query(req, res, sql, function(response){
+            if(!response){
+                res.redirect('/login');
+            }
+            else {
+                comm = response[0].commandes;
+                res.render('guess', {auth: true, command : comm});
+            }
+        });
+
+    }
+};
+
+/**
+ * Suppression utilisateurs
  * @param req
  * @param res
  */
 exports.deleteAccount = function(req, res){
-    sql = 'DELETE FROM users WHERE id='+ req.session.authid;
-    mysql.query(req, res, sql, function(response){
+    sql_user = 'DELETE FROM users WHERE id='+ req.session.authid;
+    mysql.query(req, res, sql_user, function(response){
         if(response.affectedRows != 1){
 
         }else {
-            res.redirect('/login');
+            sql_draw = 'DELETE FROM draws WHERE id_user='+ req.session.authid;
+            mysql.query(req, res, sql_draw, function(response){
+                if(response.affectedRows != 1){
+
+                }
+                else {
+                    if (req.session.authid) {
+                        req.session.destroy(function (err) {
+                            if (err)
+                                logger.error(err);
+                            else
+                                res.redirect('/login');
+                        });
+                    }
+                }
+            });
+
         }
     });
 };

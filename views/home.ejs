@@ -62,7 +62,9 @@
                                      <td ><%= dessins[i].id %></td>
                                      <td ><%= dessins[i].nom_dessin %></td>
                                      <td >
-                                         <a class="btn btn-primary" href="/guess"><i class="glyphicon glyphicon-eye-open"></i></a>
+                                         <form method="post" action="/guess">
+                                             <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-eye-open"></i></button>
+                                             <input type="hidden" name="id_view_dessin" value="<%= dessins[i].id %>" />
                                      </td>
                                      <td >
                                          <form method="post" action="/deleteDessin">
