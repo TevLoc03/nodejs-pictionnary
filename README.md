@@ -2,15 +2,11 @@
 
 ## Appli web pictionnary en Nodejs
 
-Pas encore fini reste : 
-- partie administration (en cours )
-- facebook ( en cours ) 
-
-
-Fini : 
+- partie administration ( acces, listes users , suppression )
+- facebook ( juste connexion pas gestions des sessions) 
 - inscription
 - connexion local
-- modilf profil
+- modification profil
 - suppression dessin 
 - suppression user 
 - design 

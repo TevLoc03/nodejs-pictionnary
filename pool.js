@@ -14,8 +14,8 @@ exports.getHome = function (req, res) {
     sql = "SELECT id, nom_dessin FROM draws WHERE id_user = " + req.session.auth.id;
     mysql.query(req, res, sql, function (response) {
         dessin = response;
-        logger.info(dessin);
-        res.render('home',{auth:true, dessins : dessin, user: req.session.auth});
+
+        res.render('home', {auth:true, dessins : dessin, user: req.session.auth, photo: picture});
     });
 };
 
@@ -57,8 +57,8 @@ exports.login_verify = function(req, res){
                     res.render('login', {errors: ['Email ou mot de passe incorrect.']});
                 } else {
                     req.session.auth = response[0];
-                        logger.error(req.session.auth);
-                        res.redirect('/home');
+                    picture = req.session.auth.profilepic.toString('utf8');
+                    res.redirect('/home');
                 }
             });
         }
@@ -142,9 +142,20 @@ exports.postSubscribe = function(req, res){
 
 
                     mysql.query(req, res, sql, function (response) {
-                        logger.error(response);
-                        req.session.auth.id = response.insertId;
-                        res.redirect('/home');
+
+                        sql = "SELECT * FROM users WHERE id=" + response.insertId;
+
+                        mysql.query(req, res, sql, function (response) {
+                            if (response.length != 1) {
+                                res.render('login');
+                            } else {
+                                req.session.auth = response[0];
+                                picture = req.session.auth.profilepic.toString('utf8');
+                                logger.error(req.session.auth);
+                                res.redirect('/home');
+                            }
+                        });
+
                     });
                }
             });
@@ -228,14 +239,15 @@ exports.postGuess = function(req, res) {
     if(!req.session.auth){
         res.redirect('/login');
     }else{
-        sql = 'SELECT commandes FROM draws WHERE id =' + req.body.id_view_dessin;
+        sql = 'SELECT nom_dessin, commandes FROM draws WHERE id =' + req.body.id_view_dessin;
         mysql.query(req, res, sql, function(response){
             if(!response){
                 res.redirect('/login');
             }
             else {
                 comm = response[0].commandes;
-                res.render('guess', {auth: true, command : comm});
+                nom = response[0].nom_dessin;
+                res.render('guess', {auth: true, command : comm, nom_dessin: nom});
             }
         });
 
@@ -255,18 +267,22 @@ exports.deleteAccount = function(req, res){
         }else {
             sql_draw = 'DELETE FROM draws WHERE id_user='+ req.session.auth.id;
             mysql.query(req, res, sql_draw, function(response){
+                logger.debug(response);
                 if(response.affectedRows != 1){
-
+                    req.session.destroy(function (err) {
+                        if (err)
+                            logger.error(err);
+                        else
+                            res.redirect('/login');
+                    });
                 }
                 else {
-                    if (req.session.auth) {
-                        req.session.destroy(function (err) {
-                            if (err)
-                                logger.error(err);
-                            else
-                                res.redirect('/login');
-                        });
-                    }
+                    req.session.destroy(function (err) {
+                        if (err)
+                            logger.error(err);
+                        else
+                            res.redirect('/login');
+                    });
                 }
             });
 
@@ -328,7 +344,7 @@ exports.getAdmin = function(req, res){
     if(!req.session.auth){
         res.redirect('/login');
     }else{
-        sql = "SELECT * FROM users ";
+        sql = "SELECT * FROM users WHERE id <> "+ req.session.auth.id;
         mysql.query(req, res, sql, function (response) {
             user = response;
             logger.info(user);
@@ -345,8 +361,9 @@ exports.deleteUser = function(req, res){
         }else {
             sql_draw = 'DELETE FROM draws WHERE id_user='+ req.body.id_delete_user;
             mysql.query(req, res, sql_draw, function(response){
+                logger.debug(response);
                 if(response.affectedRows != 1){
-
+                    res.redirect('/admin');
                 }
                 else {
                     res.redirect('/admin');
