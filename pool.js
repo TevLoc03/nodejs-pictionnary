@@ -328,15 +328,31 @@ exports.getAdmin = function(req, res){
     if(!req.session.auth){
         res.redirect('/login');
     }else{
-        res.render('admin', {auth: true});
+        sql = "SELECT * FROM users ";
+        mysql.query(req, res, sql, function (response) {
+            user = response;
+            logger.info(user);
+            res.render('admin', {auth:true, users : user});
+        });
     }
 };
 
-exports.postAdmin = function(req, res){
-    sql = "SELECT * FROM users ";
-    mysql.query(req, res, sql, function (response) {
-        user = response;
-        logger.info(user);
-        res.render('home',{auth:true, users : user, user: req.session.auth});
+exports.deleteUser = function(req, res){
+    sql_user = 'DELETE FROM users WHERE id='+ req.body.id_delete_user;
+    mysql.query(req, res, sql_user, function(response){
+        if(response.affectedRows != 1){
+
+        }else {
+            sql_draw = 'DELETE FROM draws WHERE id_user='+ req.body.id_delete_user;
+            mysql.query(req, res, sql_draw, function(response){
+                if(response.affectedRows != 1){
+
+                }
+                else {
+                    res.redirect('/admin');
+                }
+            });
+
+        }
     });
 };

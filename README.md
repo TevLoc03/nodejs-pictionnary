@@ -3,8 +3,8 @@
 ## Appli web pictionnary en Nodejs
 
 Pas encore fini reste : 
-- partie administration
-- facebook 
+- partie administration (en cours )
+- facebook ( en cours ) 
 
 
 Fini : 
@@ -17,4 +17,5 @@ Fini :
 - parti dessiner
 - deconnexion
 - guess pour revoir les dessins
+- BDD
 

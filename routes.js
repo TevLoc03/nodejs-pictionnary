@@ -82,6 +82,5 @@ module.exports = function (app) {
      * Route administration
      */
     app.get('/admin', pool.getAdmin);
-    app.post('/admin', pool.postAdmin);
-   // app.get('/deleteUser', pool.deleteUser);
+    app.post('/deleteUsers', pool.deleteUser);
 };
