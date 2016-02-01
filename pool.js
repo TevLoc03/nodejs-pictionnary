@@ -11,13 +11,13 @@ var sha256 = require('sha256');
  * @param res
  */
 exports.getHome = function (req, res) {
-    sql = "SELECT id, nom_dessin FROM draws WHERE id_user = " + req.session.authid;
+    sql = "SELECT id, nom_dessin FROM draws WHERE id_user = " + req.session.auth.id;
     mysql.query(req, res, sql, function (response) {
         dessin = response;
         logger.info(dessin);
-            res.render('home',{auth:true, dessins : dessin});
+        res.render('home',{auth:true, dessins : dessin, user: req.session.auth});
     });
-}
+};
 
 /**
  * Partie Connexion
@@ -25,7 +25,7 @@ exports.getHome = function (req, res) {
  * @param res
  */
 exports.home_redirect = function(req, res){
-    if(req.session.authid){
+    if(req.session.auth){
         res.redirect('/home');
     }else{
         res.render('login', {errors: []});
@@ -33,7 +33,7 @@ exports.home_redirect = function(req, res){
 };
 
 exports.login_verify = function(req, res){
-    if(req.session.authid) {
+    if(req.session.auth) {
         res.redirect('/home');
     } else {
         errors = [];
@@ -49,15 +49,15 @@ exports.login_verify = function(req, res){
             res.render('login', {errors: errors});
         else {
             // création de la requete SQL
-            sql = 'SELECT id FROM users WHERE email = ' + mysql.escape(req.body.email) + ' AND password = ' + mysql.escape(sha256(req.body.password));
+            sql = 'SELECT * FROM users WHERE email = ' + mysql.escape(req.body.email) + ' AND password = ' + mysql.escape(sha256(req.body.password));
 
             // Sinon on regarde si l'utilisateur existe dans la base de donnée
             mysql.query(req, res, sql, function (response) {
                 if (response.length != 1) {
                     res.render('login', {errors: ['Email ou mot de passe incorrect.']});
                 } else {
-                    req.session.authid = response[0].id;
-                        logger.error(response);
+                    req.session.auth = response[0];
+                        logger.error(req.session.auth);
                         res.redirect('/home');
                 }
             });
@@ -71,7 +71,7 @@ exports.login_verify = function(req, res){
  * @param res
  */
 exports.getSubscribe = function(req, res){
-    if(req.session.authid){
+    if(req.session.auth){
         res.redirect('/home');
     }else{
         res.render('subscribe', {errors: [], data : req.body});
@@ -79,7 +79,7 @@ exports.getSubscribe = function(req, res){
 };
 
 exports.postSubscribe = function(req, res){
-    if(req.session.authid)
+    if(req.session.auth)
         res.redirect('/home');
     else {
         errors = [];
@@ -140,10 +140,10 @@ exports.postSubscribe = function(req, res){
                         mysql.escape(req.body.couleur) + ',' +
                         mysql.escape(req.body.photo) + ')';
 
-                    // on regarde si l'utilisateur existe dans la base de donnée
+
                     mysql.query(req, res, sql, function (response) {
                         logger.error(response);
-                        req.session.authid = response.insertId;
+                        req.session.auth.id = response.insertId;
                         res.redirect('/home');
                     });
                }
@@ -158,7 +158,7 @@ exports.postSubscribe = function(req, res){
  * @param res
  */
 exports.signout = function(req, res){
-    if(req.session.authid){
+    if(req.session.auth){
         req.session.destroy(function(err) {
             if (err)
                 logger.error(err);
@@ -176,7 +176,7 @@ exports.signout = function(req, res){
  * @param res
  */
 exports.getPaint = function(req, res){
-    if(!req.session.authid){
+    if(!req.session.auth){
         res.redirect('/login');
     }else{
         res.render('paint', {auth: true});
@@ -184,9 +184,9 @@ exports.getPaint = function(req, res){
 };
 
 exports.postPaint = function(req, res){
-        if(req.session.authid) {
+        if(req.session.auth) {
             sql = 'INSERT INTO draws (id_user, commandes, dessin, nom_dessin) VALUES (' +
-                mysql.escape(req.session.authid) + ', ' +
+                mysql.escape(req.session.auth.id) + ', ' +
                 mysql.escape(req.body.commands) + ', ' +
                 mysql.escape(req.body.picture) + ', ' +
                 mysql.escape(req.body.nom_dessin) + ')';
@@ -225,7 +225,7 @@ exports.deleteDessin = function(req, res){
  * @param res
  */
 exports.postGuess = function(req, res) {
-    if(!req.session.authid){
+    if(!req.session.auth){
         res.redirect('/login');
     }else{
         sql = 'SELECT commandes FROM draws WHERE id =' + req.body.id_view_dessin;
@@ -248,18 +248,18 @@ exports.postGuess = function(req, res) {
  * @param res
  */
 exports.deleteAccount = function(req, res){
-    sql_user = 'DELETE FROM users WHERE id='+ req.session.authid;
+    sql_user = 'DELETE FROM users WHERE id='+ req.session.auth.id;
     mysql.query(req, res, sql_user, function(response){
         if(response.affectedRows != 1){
 
         }else {
-            sql_draw = 'DELETE FROM draws WHERE id_user='+ req.session.authid;
+            sql_draw = 'DELETE FROM draws WHERE id_user='+ req.session.auth.id;
             mysql.query(req, res, sql_draw, function(response){
                 if(response.affectedRows != 1){
 
                 }
                 else {
-                    if (req.session.authid) {
+                    if (req.session.auth) {
                         req.session.destroy(function (err) {
                             if (err)
                                 logger.error(err);
@@ -271,5 +271,72 @@ exports.deleteAccount = function(req, res){
             });
 
         }
+    });
+};
+
+/**
+ * Pour la modification de profil
+ * @param req
+ * @param res
+ */
+exports.editUsers = function(req, res) {
+    sql_edit = 'SELECT * FROM users WHERE id=' + req.session.auth.id;
+    mysql.query(req, res, sql_edit, function (response) {
+        if (response.length == 0) {
+            res.redirect('/home');
+        }
+        else {
+            res.render('edit_user', {data: response[0], succes:[]});
+        }
+    });
+};
+
+exports.editConfirm = function(req, res){
+        // création de la requete SQL
+        sql = 'UPDATE users ' +
+            'SET email = '+ mysql.escape(req.body.email) +','+
+            ' password = '+  mysql.escape(sha256(req.body.password)) +','+
+            ' nom = '+  mysql.escape(req.body.nom) +','+
+            ' prenom = '+  mysql.escape(req.body.prenom) +','+
+            ' tel = '+  mysql.escape(req.body.tel) +','+
+            ' website = '+  mysql.escape(req.body.sw) +','+
+            ' sexe = '+  mysql.escape(req.body.sexe) +','+
+            ' birthdate = '+  mysql.escape(req.body.anniv) +','+
+            ' ville = '+  mysql.escape(req.body.ville) +
+            ' WHERE id='+ req.session.auth.id;
+
+        mysql.query(req, res, sql, function (response) {
+            if (response.length == 0) {
+
+            }
+            else {
+                sql = 'SELECT * FROM users WHERE id=' + req.session.auth.id;
+                mysql.query(req, res, sql, function (response) {
+                    req.session.auth = response[0];
+                    res.render('edit_user', {succes: 'Modifications réussies!', data: req.body});
+                });
+            }
+        });
+};
+
+/**
+ * Pour administration
+ * @param req
+ * @param res
+ */
+exports.getAdmin = function(req, res){
+    if(!req.session.auth){
+        res.redirect('/login');
+    }else{
+        res.render('admin', {auth: true});
+    }
+};
+
+exports.postAdmin = function(req, res){
+    sql = "SELECT * FROM users ";
+    mysql.query(req, res, sql, function (response) {
+        user = response;
+        logger.info(user);
+        res.render('home',{auth:true, users : user, user: req.session.auth});
     });
 };

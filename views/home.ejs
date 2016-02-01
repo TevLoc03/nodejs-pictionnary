@@ -14,6 +14,9 @@
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Accueil</a></li>
+                <% if(user.role == 1){%>
+                <li ><a href="/admin">Administration</a></li>
+                <% }%>
                 <li><a href="/signout">Deconnexion</a></li>
             </ul>
         </div><!--/.nav-collapse -->
@@ -26,18 +29,17 @@
                 <div class="col-xs-12" id="profil"><h2>Profil</h2></div>
 
                 <div class="col-xs-12 text-center">
-                    <img id="img_profil" src="<%= 'test' %>" width="180" heigh="180" />
+                    <img id="img_profil" src="img/profil.png" width="180" heigh="180" />
                 </div>
                 <div class="col-xs-12">
-                    <h2 class="text-center"><%= 'test' %></h2>
-                    <h2 class="text-center"><%= 'test' %></h2>
-                    <h2 class="text-center"><%= 'test' %></h2>
-                    <h2 class="text-center"><%= 'test' %></h2>
+                    <h2 class="text-center"><%= user.prenom %></h2>
+                    <h2 class="text-center"><%= user.nom  %></h2>
+                    <h2 class="text-center"><%= user.email %></h2>
                 </div>
                 <div class="col-xs-12">
                     <a href="/paint" id="btn-commencer-dessin" class="btn btn-lg btn-success">Commencer un dessin</a>
                     <a href="/deleteAccount" id="btn-supp" class="btn btn-lg btn-danger">Supprimer profil</a>
-                    <a href="/editAccount" id="btn-commencer-dessin" class="btn btn-lg btn-info">Modifier profil</a>
+                    <a href="/edit_user" id="btn-commencer-dessin" class="btn btn-lg btn-info">Modifier profil</a>
                 </div>
             </div>
         </div>

@@ -5,12 +5,12 @@
 Pas encore fini reste : 
 - partie administration
 - facebook 
-- modif profil
 
 
 Fini : 
 - inscription
 - connexion local
+- modilf profil
 - suppression dessin 
 - suppression user 
 - design 

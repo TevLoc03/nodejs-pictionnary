@@ -19,7 +19,7 @@ module.exports = function (app) {
      * Si l'utilisateur est rediriger soit vers login soit vers home si il est connecter
      */
     app.get('/', function (req, res) {
-        if(req.session.authid){
+        if(req.session.auth){
             res.render('home', {auth:true});
         }else{
             res.redirect('/login');
@@ -72,4 +72,16 @@ module.exports = function (app) {
      */
     app.get('/deleteAccount', pool.deleteAccount);
 
+    /**
+     * Route pour edité utilisateur
+     */
+    app.get('/edit_user', pool.editUsers);
+    app.post('/editConfirm', pool.editConfirm);
+
+    /**
+     * Route administration
+     */
+    app.get('/admin', pool.getAdmin);
+    app.post('/admin', pool.postAdmin);
+   // app.get('/deleteUser', pool.deleteUser);
 };
